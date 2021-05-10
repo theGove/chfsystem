@@ -1,2 +1,2 @@
 const gas_url=
-"https://script.google.com/macros/s/AKfycbzJmbb0TQl1MEXsWUiLRSSClk2W1IOaUuTvtCt3Ew1zPkEKarv2g07mJvSW5nFb-VZE/exec"
+"https://script.google.com/macros/s/AKfycbwYl3vh94fCqKDxxoW5mnnEpLeKgQmlJymgGTLeAprHsPldcF4AU0ufKi1z1m7JjfrC/exec"
