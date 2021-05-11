@@ -111,9 +111,6 @@ function onSignIn(googleUser) {
   }
 
 
-function start_me_up(){
-    
-}
 
 function process_menu(menu,item){
     console.log("hi")
@@ -133,9 +130,11 @@ function process_menu(menu,item){
        const data1=JSON.parse(payload)
        try {
          data=JSON.parse(data1)
-         // if we made it here, there was no error parsing the response as JSON
+          // if we made it here, there was no error parsing the response as JSON
          if(data.redirect){
-             window.open(data.redirect, '_blank');
+            window.open(data.redirect, '_blank');
+         }else if(data.method){  // if the google apps script returns a method, just call that method and pass the data
+            this[data.method](data)
          }else{
              alert("No redirect speficied, and redirect is the only anticipated JSON option")
          }
@@ -147,6 +146,12 @@ function process_menu(menu,item){
        document.getElementById("hourglass").src="images/clear.png"
     })
 
+}
+
+function collapse(data){
+    
+    document.getElementById("body").innerHTML ='<h1>' + data.title + '</h1><div class="page" id="B"></div>'
+    show_statement(data)
 }
 
 function toggleImage(image){// toggles the width of an image
