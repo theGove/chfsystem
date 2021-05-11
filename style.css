@@ -15,6 +15,10 @@ body{
     font-family: Tahoma, Verdana, Segoe, sans-serif;
     margin:0;
 }
+
+h1{
+  padding-left: 2rem;
+}
  #hourglass{
     float: right; 
     margin-top: 6px ;
