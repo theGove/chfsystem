@@ -240,7 +240,9 @@ text-align: right;
 .hover-visible{
   background-color: lightpink;
 }
+.slight{
 
+}
 .task{
 	display:block;
 	background-color: rgb(231, 235, 240);
@@ -286,6 +288,12 @@ div.outcome-detail a:hover{
   margin-top: .5rem;
   }
 
+.slight{
+	color:#999;
+	font-weight: normal;
+  font-size: 1rem;
+  
+}
 .parameter-display{
   display:inline;
   background-color:rgb(255, 255, 188);

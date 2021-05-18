@@ -44,15 +44,15 @@
 
 .cards {
 	margin-left: 1rem;
-	display: flex;
+	/*display: flex;
 	flex-wrap: wrap;
-	justify-content: flex-start;
+	justify-content: flex-start; */
 }
 
 .card {
 	margin-right:1rem;
 	margin-top:1rem;
-	flex: 1 1 20rem;
+	/*flex: 1 1 20rem; */
 	border-radius: 0 0 10px 10px;
 	background-color: rgb(213, 220, 228);
 }

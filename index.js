@@ -120,6 +120,26 @@ async function update_mission_parameter(id,parameter,value){
 
 }
 
+async function duplicate_mission(id){
+    
+    const payload={voucher:voucher,token:token,mode:"duplicate_mission", mission_id:id}  
+    console.log ("payload",JSON.stringify(payload))
+    
+    response = await fetch(gas_url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'omit', // include, *same-origin, omit
+        headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+        }
+    })
+    
+    const response_load = await response.text()
+    console.log("payload",response_load)
+
+}
+
+
 function action(task,tag){
       const payload={voucher:voucher,token:token,mode:"action",task:task}  
       console.log ("payload",JSON.stringify(payload))
@@ -388,7 +408,7 @@ async function show_spy_operations(){
           }
         }
         console.log(id,operation, mission_parameters)
-        html+='<div class="card"><div onclick="toggle_missions(\''+id+'\')" class="card-head '
+        html+='<div class="card"><div class="card-head '
         if(operation.side==="American"){
             html+='us'
           }else{
@@ -415,7 +435,8 @@ function build_mission_list(operation_id){
     html.push("<div>")
     if(operation.missions){
         for([key,mission] of Object.entries(operation.missions)){
-            html.push('<div class="label-link" onClick="show_mission(\''+operation_id+'\', \''+mission.id+'\')">'+replace_all(operation.mission_name, mission.parameters)+'</div> ')
+            const the_date = new Date(mission.createdTime)
+            html.push('<div class="label-link" onClick="show_mission(\''+operation_id+'\', \''+mission.id+'\')">'+replace_all(operation.mission_name, mission.parameters)+' <span class="slight">'+the_date.toString()+'</span></div> ')
             html.push('')
             html.push('')
         }
@@ -484,7 +505,7 @@ function show_mission(operation_id,mission_id){
     html.push(render_task(operation, mission_id, task_id, include_description))
   }
   html.push('<div><button onclick="publish_mission(\'' + operation.id + '\',\'' + mission_id + '\')">Publish</button> ')
-  html.push('<button onclick="alert(\'Duplicating\')">Duplicate</button> ')
+  html.push('<button onclick="duplicate_mission(\''+mission_id+'\')">Duplicate</button> ')
   html.push('<button onclick="show_mission_list(\''+operation.id+'\')">Close</button></div>')
   tag.innerHTML=html.join("")
 }
