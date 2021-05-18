@@ -1,110 +1,108 @@
 #body{
-    position: relative;
-    height: 100vh; 
+  position: relative;
+  height: 100vh; 
 
-  }
-  #center {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
+}
+#center {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
 
 body{
-    font-family: Tahoma, Verdana, Segoe, sans-serif;
-    margin:0;
+  font-family: Tahoma, Verdana, Segoe, sans-serif;
+  margin:0;
 }
 
 h1{
-  padding-left: 2rem;
+padding-left: 2rem;
 }
- #hourglass{
-    float: right; 
-    margin-top: 6px ;
-    margin-right: 6px ;
-    width: 30px;
- }
+#hourglass{
+  float: right; 
+  margin-top: 6px ;
+  margin-right: 6px ;
+  width: 30px;
+}
 
 
 #navigation {
-    margin: 0;
-    padding: 0 1em;
-    background: rgb(43, 55, 66);
-    height: 3em;
-    list-style: none;
-   }
-   
-   #navigation > li {
-    float: left;
-    height: 100%;
-    margin-right: 0.5em;
-    padding: 0 1em;
-   }
-   
-   #navigation > li > a {
-    float: left;
-    height: 100%;
-    color: rgb(201, 179, 133);
-    text-decoration: none;
-    line-height: 3;
-    font-weight: bold;
-   }
-   
-   #navigation > li > a:hover {
-    color: rgb(202, 170, 99);
-    text-decoration: underline;
-   }
+  margin: 0;
+  padding: 0 1em;
+  background: rgb(43, 55, 66);
+  height: 3em;
+  list-style: none;
+ }
+ 
+ #navigation > li {
+  float: left;
+  height: 100%;
+  margin-right: 0.5em;
+  padding: 0 1em;
+ }
+ 
+ #navigation > li > a {
+  float: left;
+  height: 100%;
+  color: rgb(201, 179, 133);
+  text-decoration: none;
+  line-height: 3;
+  font-weight: bold;
+ }
+ 
+ #navigation > li > a:hover {
+  color: rgb(202, 170, 99);
+  text-decoration: underline;
+ }
+
+
+
+
+ #navigation > li.sub {
+  position: relative;
+ }
 
 
 
 
 
-
-   #navigation > li.sub {
-    position: relative;
-   }
-
-
-
-
-
-   #navigation > li.sub ul {
-    width: 10em;
-    margin: 0;
-    padding: 0.5em 0;
-    list-style: none;
-    background: rgb(201, 179, 133);
-    position: absolute;
-    top: -1000em;
-    z-index: 2; 
-   }
-   
-   #navigation > li.sub ul li {
-    width: 90%;
-    margin: 0 auto 0.3em auto;
-    
-   }
-   
-   #navigation > li.sub ul li a {
-    height: 100%;
-    display: block;
-    padding: 0.4em;
-    color: rgb(43, 55, 66);
-    font-weight: bold;
-    text-decoration: none;
-   }
-   
-   #navigation > li.sub ul li a:hover {
-    background: rgb(224, 200, 146);
-    text-decoration: underline;
-   }
+ #navigation > li.sub ul {
+  width: 10em;
+  margin: 0;
+  padding: 0.5em 0;
+  list-style: none;
+  background: rgb(201, 179, 133);
+  position: absolute;
+  top: -1000em;
+  z-index: 2; 
+ }
+ 
+ #navigation > li.sub ul li {
+  width: 90%;
+  margin: 0 auto 0.3em auto;
+  
+ }
+ 
+ #navigation > li.sub ul li a {
+  height: 100%;
+  display: block;
+  padding: 0.4em;
+  color: rgb(43, 55, 66);
+  font-weight: bold;
+  text-decoration: none;
+ }
+ 
+ #navigation > li.sub ul li a:hover {
+  background: rgb(224, 200, 146);
+  text-decoration: underline;
+ }
 
 
 
-   #navigation > li.sub:hover ul {
-    top: 3em;
-   }
+ #navigation > li.sub:hover ul {
+  top: 3em;
+ }
 
 
 
@@ -134,38 +132,38 @@ h1{
 .full-image{padding-right:8px;}
 .editcell{padding:0}
 .editable {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 .updating {
-    width: 100%;
-    height: 100%;
-    background-color: #ccc;
+  width: 100%;
+  height: 100%;
+  background-color: #ccc;
 }
 
 /*https://www.bestcssbuttongenerator.com/#/2*/
 .activeButton {
-	box-shadow: 0px 10px 14px -7px #276873;
-	background:linear-gradient(to bottom, #599bb3 5%, #408c99 100%);
-	background-color:#599bb3;
-	border-radius:8px;
-	display:inline-block;
-	cursor:pointer;
-	color:#ffffff;
-	font-family:Arial;
-	font-size: .9rem;
-	font-weight:bold;
-	padding:.5rem 1rem;
-	text-decoration:none;
-	text-shadow:0px 1px 0px #3d768a;
+box-shadow: 0px 10px 14px -7px #276873;
+background:linear-gradient(to bottom, #599bb3 5%, #408c99 100%);
+background-color:#599bb3;
+border-radius:8px;
+display:inline-block;
+cursor:pointer;
+color:#ffffff;
+font-family:Arial;
+font-size: .9rem;
+font-weight:bold;
+padding:.5rem 1rem;
+text-decoration:none;
+text-shadow:0px 1px 0px #3d768a;
 }
 .activeButton:hover {
-	background:linear-gradient(to bottom, #408c99 5%, #599bb3 100%);
-	background-color:#408c99;
+background:linear-gradient(to bottom, #408c99 5%, #599bb3 100%);
+background-color:#408c99;
 }
 .activeButton:active {
-	position:relative;
-	top:1px;
+position:relative;
+top:1px;
 }
 
 
@@ -176,60 +174,161 @@ h1{
 
 /* ====================  Collapse ================= */
 .collapsible {
-  background-color: white;
-  color: black;
-  cursor: pointer;
-  /*width: 100%;*/
-  
-  text-align: left;
-  margin-top: 5px;
+background-color: white;
+color: black;
+cursor: pointer;
+/*width: 100%;*/
+
+text-align: left;
+margin-top: 5px;
 }
 
 .collapsible:hover {
-  background-color: #eee;
+background-color: #eee;
 }
 
 .content {
-  padding-left: .5rem;
-  padding-right: 1rem;
-  cursor: default;
-  display: block;
-  overflow: hidden;
-  background-color: white;
-  font-size:1.2rem;
-  margin-bottom: 5px;
+padding-left: .5rem;
+padding-right: 1rem;
+cursor: default;
+display: block;
+overflow: hidden;
+background-color: white;
+font-size:1.2rem;
+margin-bottom: 5px;
 
 }
 
 .child-container {
-  padding-left: .5rem;
-  padding-right: 1rem;
-  display: none;
-  overflow: hidden;
-  background-color: white;
+padding-left: .5rem;
+padding-right: 1rem;
+display: none;
+overflow: hidden;
+background-color: white;
 }
 
 
 .page{
-  padding-left:5rem;
-  width: 50rem;
-  /* width:50rem;*/
+padding-left:5rem;
+width: 50rem;
+/* width:50rem;*/
 
 }
 
 
 
 .label {
-  position: absolute;
+position: absolute;
 
 }
 
 .number::before {
-  content:"";
+content:"";
 }
 
 .number {
-  text-align: right;
+text-align: right;
 
 
+}
+
+
+
+
+
+/*--------------------- spy mission tasks ------------------------*/
+.hover-visible{
+  background-color: lightpink;
+}
+
+.task{
+	display:block;
+	background-color: rgb(231, 235, 240);
+	margin-bottom:.2rem;
+	padding:.3rem;
+}
+.outcome{
+	display:block;
+  margin-left:1rem;
+	margin-bottom:.2rem;
+	background-color: rgb(231, 235, 240);
+	padding:.3rem;
+}
+div.outcome-detail a:link{
+  color:blue;
+  text-decoration: none;
+  border: 1px solid black;
+  padding-left: .5rem;
+  padding-right: .5rem;
+  padding-bottom: .1rem;
+  background-color: white;
+  border-radius: 5px;
+}
+div.outcome-detail a:visited{
+  color:blue;
+  
+}
+div.outcome-detail a:hover{
+  background-color:#fafaff;
+}
+.outcome-detail{
+	display:block;
+  margin-left:1rem;
+	padding:.3rem;
+	margin-bottom:.2rem;
+}
+
+.task-name{
+  display:block;
+	color:#394f64;
+	font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: .5rem;
+  }
+
+.parameter-display{
+  display:inline;
+  background-color:rgb(255, 255, 188);
+  border-radius: 14px;
+  padding-left: .3rem;
+  padding-right: .3rem;
+}
+
+.unassigned-parameter-display{
+  display:inline;
+  background-color:lightgreen;
+  border-radius: 14px;
+  padding-left: .3rem;
+  padding-right: .3rem;
+}
+
+
+.parameter-updating{
+  display:inline;
+  background-color:lightgrey;
+  border-radius: 14px;
+  padding-left: .3rem;
+  padding-right: .3rem;
+}
+
+.junk2{
+  display:inline;
+  background-color: green;
+  border-radius: 14px;
+  padding-left: .3rem;
+  padding-right: .3rem;
+}
+
+
+.parameter-editing{
+  display:inline;
+}
+
+.parameter-input{
+  border:1;
+  outline:0;
+  border-radius: 14px;
+  padding-left: .3rem;
+  padding-right: .3rem;
+  background-color: white;
 }
