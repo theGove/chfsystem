@@ -1,5 +1,6 @@
 let key=null
 const activities=["Reenactor","Artisan","Vendor","Volunteer"]
+const arrival_times=["Morning","Afternoon","Evening"]
 
 
 async function start_me_up(){
@@ -12,7 +13,7 @@ async function start_me_up(){
     html.push('<div class="data-container">')
     html.push(place_data("first_name"))
     html.push(place_data("last_name"))
-    html.push(place_data("activity",{type:"multi-select",object:activities}))
+    html.push(place_data("activity",{type:"multi-select",list:activities}))
     html.push(place_data("activity_description",{label:"Tell us about what you do:",type:"multi-line"}))
     html.push(place_data("city"))
     html.push(place_data("state",{size:2}))
@@ -24,9 +25,11 @@ async function start_me_up(){
     html.push(place_data("years_attended",{type:"integer", size:4}))
     html.push(place_data("participating_adults",{type:"integer", size:4}))
     html.push(place_data("participating_children",{type:"integer", size:4}))
-    html.push(place_data("arrival_date"))
-    html.push('</div><div id="error-message"></div>')
+    html.push(place_data("arrival_date",{type:"date"}))
+    html.push(place_data("arrival_time",{type:"single-select",list:arrival_times}))
+    html.push(place_data("agreement",{type:"attachment"}))
 
+    html.push('</div><div id="error-message"></div>')
     document.body.innerHTML=html.join("")
     
 
@@ -47,20 +50,25 @@ function place_data(field,params){
     }
 
     html.push('<div class="data-row"><div data-label="'+label+'" ')
-    if(type==='text'||type==='integer'){
+    console.log("type",type)
+    if(type==='date'){
         html.push('data-class="data-label" class="data-label" id="' + field + '_label">'+label+"</div>")
         html.push('<div class="data-field"><input ')
         if(data.fields[field]!==undefined){
             html.push(' value="'+data.fields[field]+'"')
         }        
-        if(params.size){
-            html.push(' size="'+params.size+'"')
+        html.push(' type="date" id="'+field+'" onchange="change(this)" /></div>')
+
+    }else if(type==='attachment'){
+        console.log("at attachement------------------")
+        html.push('data-class="data-label" class="data-label" id="' + field + '_label">'+label+"</div>")
+        html.push('<div class="data-field">')
+        if(data.fields[field]){
+            for(const entry of data.fields[field]){
+                html.push('<a target="_blank" href="' + entry.url + '"><img alt="'+entry.filename+'" src="' + entry.thumbnails.small.url + '"></a>')
+            }
         }        
-        if(type!=='text'){
-            html.push(' data-validation="' + type + '"')
-            html.push(' style="text-align:right"')
-        }        
-        html.push(' type=text id="'+field+'" onchange="change(this)" /></div>')
+        html.push('</div>')
     }else if(type==='multi-line'){
         html.push('data-class="memo-label" class="memo-label" id="' + field + '_label">'+label+"</div>")
         html.push('<div class="memo-field"><textarea class="memo" rows=5 id="'+field+'" onchange="change(this)">')
@@ -68,10 +76,21 @@ function place_data(field,params){
             html.push(data.fields[field])
         }        
         html.push('</textarea></div>')
+    }else if(type==='single-select'){
+        html.push('data-class="data-label" class="data-label" id="' + field + '_label">'+label+"</div>")
+        html.push('<div class="data-field"><select onchange="change(this)" id="'+field+'">')
+        for(const entry of params.list){
+            html.push('<option value="'+entry+'" ')
+            if(data.fields[field].includes(entry)){
+                html.push('checked ')
+            }
+            html.push('> '+entry+'</option><br>')
+        }
+        html.push('</select></div>')
     }else if(type==='multi-select'){
         html.push('data-class="data-label" class="data-label" id="' + field + '_label">'+label+"</div>")
         html.push('<div class="data-field">')
-        for(const entry of params.object){
+        for(const entry of params.list){
             html.push('<input ')
             if(data.fields[field].includes(entry)){
                 html.push('checked ')
@@ -94,6 +113,20 @@ function place_data(field,params){
         html.push('type="radio" name="'+field+'" id="'+field+'|no" onchange="change(this)" value="true"/>No')
     
         html.push('</div>')
+    }else{
+        html.push('data-class="data-label" class="data-label" id="' + field + '_label">'+label+"</div>")
+        html.push('<div class="data-field"><input ')
+        if(data.fields[field]!==undefined){
+            html.push(' value="'+data.fields[field]+'"')
+        }        
+        if(params.size){
+            html.push(' size="'+params.size+'"')
+        }        
+        if(type!=='text'){
+            html.push(' data-validation="' + type + '"')
+            html.push(' style="text-align:right"')
+        }        
+        html.push(' type="text" id="'+field+'" onchange="change(this)" /></div>')
     }
     html.push("</div>")
     console.log(html.join(""))
