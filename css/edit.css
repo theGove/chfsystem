@@ -1,0 +1,72 @@
+
+body{
+  font-family: Tahoma, Verdana, Segoe, sans-serif;
+  margin:0;
+  background-color: papayawhip;
+}
+
+h1{
+  padding-left: 2rem;
+  color:#800000;
+  font-size: 1.5rem;
+}
+
+.updating {
+  background-color: #aaa;
+  color:white;
+  font-weight: bold;
+  text-align: center;
+}
+.success {
+  background-color: green;
+  color:white;
+  font-weight: bold;
+  text-align: center;
+}
+.failure {
+  background-color: rgb(211, 0, 0);
+  color:white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.data-container{
+  
+  display:block;
+}
+.data-row{
+  display:block;
+  
+}
+.data-label{
+  margin-left:1rem;
+  float:left;
+}
+.data-message{
+  margin-left:1rem;
+  float:left;
+  display:none;
+}
+
+.memo-label{
+  display:block;
+  margin-left:1rem;
+  margin-right:1rem;
+}
+#error-message{
+  display:block;
+  margin-left:1rem;
+  margin-right:1rem;
+}
+
+.data-field{
+  margin-left:1rem;
+  display:inline-block;
+  padding-bottom: .5rem;
+}
+.memo-field{
+  margin-left:1rem;
+  margin-right:1rem;
+  display:block;
+  padding-bottom: .5rem;
+}

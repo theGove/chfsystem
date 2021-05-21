@@ -1,0 +1,17 @@
+/**************************************************/
+/******** configuration just for one page *********/
+/**************************************************/
+.data-container{
+  /*background-color: green;*/
+  max-width: 500px;
+}
+.data-label{
+  width: 10rem
+}
+.memo{
+  width: 100%;
+  font-family: Tahoma, Verdana, Segoe, sans-serif;
+
+  font-size: 1rem;   
+  
+}
