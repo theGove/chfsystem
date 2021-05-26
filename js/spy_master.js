@@ -22,9 +22,45 @@ async function update_mission_parameter(id,parameter,value){
     })
     
     const response_load = await response.text()
+
     console.log("payload",response_load)
 
 }
+
+async function update_mission_field(id,field,value, data_type){
+    // need to update the mission params 
+    let val=value
+    if(data_type==='int'){
+        val=parseInt(value)
+    }else if (data_type==='float'){
+        val=parseFloat(value)
+    }
+    const payload={voucher:voucher,token:token,mode:"update_mission", id:id, column:field, value:val}  
+    console.log ("payload",JSON.stringify(payload))
+    
+    response = await fetch(gas_url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'omit', // include, *same-origin, omit
+        headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+        }
+    })
+    try{
+      const response_load = await response.text()
+      console.log("payload",response_load)
+      // updated database, now update local cache
+      const mission=get_mission(id)
+      mission[field]=val
+
+      return true
+    }catch(e){
+      return e
+    }
+
+}
+
+
 
 async function duplicate_mission(id){
     
@@ -244,7 +280,7 @@ function toggle_missions(operation_id){
     }
 }
 
-function show_mission(operation_id,mission_id){
+async function show_mission(operation_id,mission_id){
   const tag=document.getElementById('mission_'+operation_id)
   if(mission_id==="close"){
     tag.innerHTML=""
@@ -279,11 +315,112 @@ function show_mission(operation_id,mission_id){
     if(task_count++>0){include_description=false}  
     html.push(render_task(operation, mission_id, task_id, include_description))
   }
-  html.push('<div><button onclick="publish_mission(\'' + operation.id + '\',\'' + mission_id + '\')">Publish</button> ')
+  html.push('<div>')
+
+
+  const mission_active=await get_mission_status(operation_id,mission_id)
+
+  html.push('Spy Limit: <input name="spy_limit" data-id="'+mission.id+'" data-set="mission" data-type="int" onchange="update_column(this)" size="4" value="'+mission.spy_limit+'"> ')
+  html.push('&nbsp;&nbsp;Active: <input type="checkbox" name="active" data-id="'+mission.id+'" data-set="mission" data-type="bool"  onchange="activate_mission(\''+operation_id+'\',\''+mission_id+'\',this.checked)" value="True" ')
+  if(mission_active){
+    html.push(" checked")
+  }
+
+  html.push('> ')
+  html.push('<button onclick="publish_mission(\'' + operation.id + '\',\'' + mission_id + '\')">Publish</button> ')
   html.push('<button onclick="duplicate_mission(\''+mission_id+'\')">Duplicate</button> ')
   html.push('<button onclick="show_mission_list(\''+operation.id+'\')">Close</button></div>')
   tag.innerHTML=html.join("")
 }
+async function update_column(tag){
+   console.log(tag.value)
+   console.log(tag.getAttribute("data-id"))
+   console.log(tag.getAttribute("data-set"))
+   console.log(tag.getAttribute("data-type"))
+   let val=tag.value
+   if (tag.getAttribute("data-type")==="bool"){
+       val=tag.checked
+   }
+    if (tag.getAttribute("data-set")==='mission'){
+        tag.style.backgroundColor="gray"
+        const resopons = await update_mission_field(tag.getAttribute("data-id"),tag.name,val,tag.getAttribute("data-type"))
+        if(response){
+            tag.style.backgroundColor="white"
+        }else{
+            tag.style.backgroundColor="red"
+        }
+        
+    }
+    
+
+}
+
+async function activate_mission(operation_id, mission_id, active){
+    const payload={  voucher:voucher,
+        token:token,
+        mode:"activate_mission",
+        operation_id:operation_id,
+        mission_id:mission_id,
+        active:active
+    }  
+    console.log ("Payload",JSON.stringify(payload))
+
+    response = await fetch(gas_url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'omit', // include, *same-origin, omit
+        headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+        }
+    })
+
+    const response_load = await response.text()
+    console.log("payload",response_load)
+
+}
+
+
+
+
+async function get_mission_status(operation_id, mission_id){
+    const payload={  voucher:voucher,
+        token:token,
+        mode:"get_mission_status",
+        operation_id:operation_id,
+        mission_id:mission_id
+    }  
+    console.log ("Payload",JSON.stringify(payload))
+
+    response = await fetch(gas_url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'omit', // include, *same-origin, omit
+        headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+        }
+    })
+
+    const response_load = await response.text()
+    let resp
+    try{
+        resp=JSON.parse(response_load)
+    }catch(e){
+        return e
+    }
+
+    console.log("resp",resp)
+    if(resp.Item){
+        return resp.Item.active.BOOL
+    }else{
+        return resp
+    }
+
+}
+
+
+
+
+
 async function publish_mission(operation_id, mission_id){
     const mission={}
     const operation=spy_data[operation_id]
@@ -299,7 +436,6 @@ async function publish_mission(operation_id, mission_id){
     mission.description = parameter_inection(operation.description, param_values)
     mission.outcomes = JSON.parse(parameter_inection(JSON.stringify(operation.outcomes),param_values))
     mission.tasks = JSON.parse(parameter_inection(JSON.stringify(operation.tasks),param_values))
-    
     // console.log("at pub mission",mission)
     
     // const outcomes={}
@@ -313,14 +449,17 @@ async function publish_mission(operation_id, mission_id){
                      mode:"publish_mission",
                      operation:mission.operation,
                      spy_limit:mission.spy_limit.toString(),
+                     active:mission.active.toString(),
                      side:mission.side,
                      starting_task:mission.starting_task,
                      name:mission.name,
+                     mission_id:mission_id,
+                     operation_id:operation_id,
                      description:mission.description,
                      tasks:JSON.stringify(mission.tasks),
                      outcomes:JSON.stringify(mission.outcomes)
                   }  
-    console.log ("payload",JSON.stringify(payload))
+    console.log ("Payload",JSON.stringify(payload))
     
     response = await fetch(gas_url, {
         method: 'POST',
@@ -540,4 +679,16 @@ function remove_param_tags(params){
         }
     }
     return x
+}
+function get_mission(id){
+    // mission ids are unique but they are within operations.  This function scans the operations to find the mission
+    console.log(spy_data)
+    for([key, operation] of Object.entries(spy_data)){
+        for([mkey, mission] of Object.entries(operation.missions)){
+            if(mkey===id){
+                return mission
+            }
+        }
+    }
+    return null
 }
