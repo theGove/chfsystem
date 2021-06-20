@@ -402,3 +402,6 @@ div.outcome-detail a:hover{
 	background-color: rgb(213, 220, 228);
 }
 
+
+.spy-activity-table      { border-collapse: collapse;}
+.spy-activity-table td   { padding: 8px 16px; border:none;}

@@ -1,3 +1,67 @@
+// culper.web.app
+
+const speech_url="https://script.google.com/macros/s/" +
+//"AKfycbxJ__m5sCUF3pRj8npa0_KMcvpa0rxWQFvebhbwsS31sxpFxXuJvVGjQ-OwYjyCncNi" +
+"AKfycbyvRJjQ37NlW-FREYV8jkbYt9d7A0hBGWdb4EEZeS1DMKXpiOSHmZjQzj5oaoyXydbm"+
+"/exec"
+
+async function get_voice_url(mission_id, text, speaker, language, campaign, tone){
+    console.log("===========================================")
+    console.log(speaker)
+    console.log(text)
+    console.log("===========================================")
+    
+    
+
+    if(!campaign){campaign=237356}//culper
+    if(!tone){tone="normal"}//culper
+    if(!speaker){speaker="Brian"}//british dude
+    if(!language){language="en-GB"}//british
+
+
+    speaker=document.getElementById("voice").value
+    if(!document.getElementById("rebuild_voice").value ){
+
+        // check to see if we alread have this audio on dynamodb
+        let audio=await get_mission_audio(mission_id, text)
+        console.log("raw audio", audio)
+        //audio=JSON.parse(audio)
+
+        console.log("audio",audio, !!audio, audio.length, audio.slice(-3).toLowerCase())
+
+        if(audio.slice(-3).toLowerCase()==="mp3"){return audio}  // if dynamoDB had the url for this mission and text, no neet to make it
+
+    }
+
+     console.log("after audio exit")
+    // audio does not already exist, make it
+
+    const payload={text:text, speaker:speaker, tone:tone, campaign:campaign, language:language}
+    let body=JSON.stringify(payload)
+    //body='{"text","Hessian soldiers just might switch sides if they knew how much better life in America is!","speaker":"Emma","tone":"normal","campaign":237356,"language":"en-GB"}'
+    //console.log ("payload",body)
+
+    const request={
+        method: 'POST',
+        body: body,
+        credentials: 'omit', // include, *same-origin, omit
+        headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+        }
+    }
+    console.log (request)
+    response = await fetch(speech_url, request)
+    
+    const response_load = await response.text()
+    console.log("responseload",response_load)
+
+    console.log("about to remember audio")  
+    const remembered=await remember_mission_audio(mission_id, text, JSON.parse(response_load))
+    console.log("remembered", remembered)
+    return response_load
+
+}
+
 function get_mission(mission_id){// looks across all operations to find teh mission id givent
     for([key, operation] of Object.entries(spy_data)){
         for([key, mission] of Object.entries(operation.missions)){
@@ -205,6 +269,107 @@ async function fetch_spy_data(){
 
 }// end of build spy data
 
+async function set_mission_activity(tag){
+    console.log("at set spy_mission_activity")
+    document.getElementById(tag.getAttribute("data-operation_id")+"_"+tag.getAttribute("data-mission_id")+"_"+tag.getAttribute("data-column")).innerHTML =  '<img src="/images/wait.gif" width="20">'
+    const payload={  voucher:voucher,
+        token:token,
+        mode:"set_mission_activity",
+        operation_id:tag.getAttribute("data-operation_id"),
+        mission_id:tag.getAttribute("data-mission_id"),
+        increment:tag.getAttribute("data-increment"),
+        column:tag.getAttribute("data-column")
+    }  
+    console.log ("Payload",JSON.stringify(payload))
+
+    response = fetch(gas_url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'omit', // include, *same-origin, omit
+        headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+        }
+    }).then(response => response.text())
+    .then(response_load => {
+        console.log("payload",response_load)
+        resp=JSON.parse(response_load)
+        console.log("returned", resp.data.Attributes[tag.getAttribute("data-column")])
+        if(resp.data && resp.data.Attributes &&  resp.data.Attributes[tag.getAttribute("data-column")]){
+            document.getElementById(tag.getAttribute("data-operation_id")+"_"+tag.getAttribute("data-mission_id")+"_"+tag.getAttribute("data-column")).innerHTML =  resp.data.Attributes[tag.getAttribute("data-column")].N
+        }else{
+            alert("error updating: " + response_load)
+        }
+
+    })  
+
+
+    
+
+}
+async function show_spy_mission_activity(payload){
+  console.log("at show_spy_mission_activity", payload)
+  if(!spy_data){await fetch_spy_data()}// download spy info if needed
+  const operations={}
+  for(const item of payload.data.Items){
+    console.log("item", item)
+    if(!operations[item.operation.S]){operations[item.operation.S]={
+        operation_name:item.operation_name.S,
+        missions:{}
+    }}
+    operations[item.operation.S].missions[item.mission.S]=item
+    spy_data[item.operation.S].missions[item.mission.S].active=item.active_spies.N
+  }
+  console.log("operations",operations)
+  console.log("spy_data",spy_data)
+  const html=[]
+  html.push('<h1>Spy Mission Control</h1><div class="cards">')
+  for([operation_id, operation]of Object.entries(operations)){
+    
+
+    html.push('<div class="card"><div class="card-head ')
+    if(spy_data[operation_id].side==="American"){
+      html.push('us')
+    }else{
+      html.push('brit')
+    }
+    html.push('">'+operation.operation_name+'</div><div class="card-body">')
+    for([mission_id, mission]of Object.entries(operation.missions)){
+        html.push("<div>")    
+        html.push(mission.mission_name.S + "<br />")    
+        html.push('<table class="spy-activity-table"><tr>')    
+
+
+        html.push('<td>&nbsp;</td><td>Active</td><td><input type="checkbox" name="active" data-id='+mission_id+'" data-set="mission" data-type="bool" onchange="activate_mission(\''+operation_id+'\',\''+mission_id+'\',this.checked)" value="True"')
+        if(mission.active.BOOL){
+            html.push(" checked")
+        }
+        html.push('></td><td id="'+operation_id + '_' + mission_id + '_active">')
+        html.push('</td>')    
+
+
+
+        html.push("</tr></tr>")    
+        html.push('<td>&nbsp;</td><td>Spy Limit</td><td><img data-increment="1" data-operation_id="'+operation_id+'" data-mission_id="'+mission_id+'" data-column="spy_limit" style="cursor:pointer" onclick="set_mission_activity(this)" width="20" src="/images/up-arrow.png"></td><td id="'+operation_id + '_' + mission_id + '_spy_limit">')
+        html.push(mission.spy_limit.N)    
+        html.push('</td><td><img data-increment="-1" data-operation_id="'+operation_id+'" data-mission_id="'+mission_id+'" data-column="spy_limit" style="cursor:pointer" onclick="set_mission_activity(this)" width="20" src="/images/down-arrow.png"></td><td id="mission_'+mission_id+'"></td>')    
+        
+        html.push("</tr></tr>")    
+        html.push('<td>&nbsp;</td><td>Active Spies</td><td><img data-increment="1" data-operation_id="'+operation_id+'" data-mission_id="'+mission_id+'" data-column="active_spies" style="cursor:pointer" onclick="set_mission_activity(this)" width="20" src="/images/up-arrow.png"></td><td id="'+operation_id + '_' + mission_id + '_active_spies">')
+        html.push(mission.active_spies.N)    
+        html.push('</td><td><img data-increment="-1" data-operation_id="'+operation_id+'" data-mission_id="'+mission_id+'" data-column="active_spies" style="cursor:pointer" onclick="set_mission_activity(this)" width="20" src="/images/down-arrow.png"></td><td id="mission_'+mission_id+'"></td>')    
+        
+        html.push("</tr></table>")    
+        html.push("</div>")    
+      }
+  
+      html.push('</div><div class="card-foot"></div></div>')
+  
+  }
+  html.push("</div>")
+  document.getElementById("body").innerHTML = html.join("")
+
+}
+
 
 async function show_spy_operations(){
     if(!spy_data){await fetch_spy_data()}// download spy info if needed
@@ -321,15 +486,18 @@ async function show_mission(operation_id,mission_id){
   const mission_active=await get_mission_status(operation_id,mission_id)
 
   html.push('Spy Limit: <input name="spy_limit" data-id="'+mission.id+'" data-set="mission" data-type="int" onchange="update_column(this)" size="4" value="'+mission.spy_limit+'"> ')
-  html.push('&nbsp;&nbsp;Active: <input type="checkbox" name="active" data-id="'+mission.id+'" data-set="mission" data-type="bool"  onchange="activate_mission(\''+operation_id+'\',\''+mission_id+'\',this.checked)" value="True" ')
-  if(mission_active){
-    html.push(" checked")
-  }
+//   html.push('&nbsp;&nbsp;Active: <input type="checkbox" name="active" data-id="'+mission.id+'" data-set="mission" data-type="bool"  onchange="activate_mission(\''+operation_id+'\',\''+mission_id+'\',this.checked)" value="True" ')
+//   if(mission_active){
+//     html.push(" checked")
+//   }
 
-  html.push('> ')
+//   html.push('> ')
+  html.push('<select id="rebuild_voice"><option value="false" checked>Build edited text</option><option value="true">Rebuild All Voice</option></select> ')
+  //html.push('<select id="voice"><option value="Brian" checked>Brian</option><option value="Emma">Emma</option></select> ')
   html.push('<button onclick="publish_mission(\'' + operation.id + '\',\'' + mission_id + '\')">Publish</button> ')
   html.push('<button onclick="duplicate_mission(\''+mission_id+'\')">Duplicate</button> ')
   html.push('<button onclick="show_mission_list(\''+operation.id+'\')">Close</button></div>')
+  html.push('<span id="message_'+mission_id+'"></span')
   tag.innerHTML=html.join("")
 }
 async function update_column(tag){
@@ -343,7 +511,7 @@ async function update_column(tag){
    }
     if (tag.getAttribute("data-set")==='mission'){
         tag.style.backgroundColor="gray"
-        const resopons = await update_mission_field(tag.getAttribute("data-id"),tag.name,val,tag.getAttribute("data-type"))
+        const resoponse = await update_mission_field(tag.getAttribute("data-id"),tag.name,val,tag.getAttribute("data-type"))
         if(response){
             tag.style.backgroundColor="white"
         }else{
@@ -356,6 +524,9 @@ async function update_column(tag){
 }
 
 async function activate_mission(operation_id, mission_id, active){
+    console.log("at activate mission")
+    document.getElementById(operation_id+"_"+mission_id+"_active").innerHTML =  '<img src="/images/wait.gif" width="20">'
+
     const payload={  voucher:voucher,
         token:token,
         mode:"activate_mission",
@@ -376,9 +547,38 @@ async function activate_mission(operation_id, mission_id, active){
 
     const response_load = await response.text()
     console.log("payload",response_load)
+    resp=JSON.parse(response_load)
+    if(resp.status==="success"){
+        document.getElementById(operation_id+"_"+mission_id+"_active").innerHTML = ""
+    }else{
+        alert("Error: " + response_load)
+    }
 
 }
 
+async function remember_mission_audio(mission_id, text, url){
+    const payload={  voucher:voucher,
+        token:token,
+        mode:"remember_mission_audio",
+        mission:mission_id,
+        text:text,
+        url:url
+    }  
+    console.log ("Payload",JSON.stringify(payload))
+
+    response = await fetch(gas_url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'omit', // include, *same-origin, omit
+        headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+        }
+    })
+
+    const response_load = await response.text()
+    console.log("remembering",response_load)
+
+}
 
 
 
@@ -418,24 +618,73 @@ async function get_mission_status(operation_id, mission_id){
 }
 
 
+async function get_mission_audio(mission_id, text){
+    const payload={  voucher:voucher,
+        token:token,
+        mode:"get_mission_audio",
+        text:text,
+        mission_id:mission_id
+    }  
+    console.log ("Payload",JSON.stringify(payload))
+
+    response = await fetch(gas_url, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        credentials: 'omit', // include, *same-origin, omit
+        headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+        }
+    })
+    const result = await response.text()
+    //console.log("result",result, JSON.parse(result))
+    return JSON.parse(result)
+}
+
+
 
 
 
 async function publish_mission(operation_id, mission_id){
+    console.log("at publish mission")
     const mission={}
     const operation=spy_data[operation_id]
-    console.log("mission", mission_id)
+    console.log("--------mission", mission_id)
     const param_values=operation.missions[mission_id].parameters
-    console.log("param_values", param_values)
+    console.log("Param Values", param_values)
+    
     mission.spy_limit = operation.missions[mission_id].spy_limit
     mission.operation = operation.name
     mission.side = operation.side
     mission.starting_task = operation.starting_task
-    mission.active = operation.missions[mission_id].active
+    mission.active = false
+    if(operation.missions[mission_id].active){mission.active=true}
     mission.name = parameter_inection(operation.mission_name, param_values)
     mission.description = parameter_inection(operation.description, param_values)
     mission.outcomes = JSON.parse(parameter_inection(JSON.stringify(operation.outcomes),param_values))
     mission.tasks = JSON.parse(parameter_inection(JSON.stringify(operation.tasks),param_values))
+
+    for([key,outcome] of Object.entries(mission.outcomes) ){
+        console.log("key", key)
+        html("message_" + mission_id,"Getting Misssion Audio for: " + outcome.response)
+        mission.outcomes[key].audio = await get_voice_url(mission_id, outcome.response, operation.voice)
+
+    }
+
+    for([key,task] of Object.entries(mission.tasks) ){
+        console.log(task)
+        html("message_" + mission_id,"Getting Misssion Audio for: " + task.description)
+        mission.tasks[key].audio = await get_voice_url(mission_id, task.description, operation.voice)
+
+    }
+
+
+    html("message_" + mission_id,"Getting Misssion Audio")
+
+    mission.audio=await get_voice_url(mission_id, mission.description, operation.voice)
+    html("message_" + mission_id,"Done")
+
+    
+
     // console.log("at pub mission",mission)
     
     // const outcomes={}
@@ -456,6 +705,7 @@ async function publish_mission(operation_id, mission_id){
                      mission_id:mission_id,
                      operation_id:operation_id,
                      description:mission.description,
+                     description_audio:mission.audio,
                      tasks:JSON.stringify(mission.tasks),
                      outcomes:JSON.stringify(mission.outcomes)
                   }  
@@ -475,6 +725,10 @@ async function publish_mission(operation_id, mission_id){
 
 
 
+}
+
+function html(id, text){
+    document.getElementById(id).innerHTML=text
 }
 
 function render_task(operation, mission_id, task_id, include_description){
@@ -526,7 +780,7 @@ function render_task(operation, mission_id, task_id, include_description){
             let parameter_class="unassigned-parameter-display"
             let param_status="empty"
             if(mission.parameters[param]){
-                console.log("-->found a match", param, mission.parameters[param])
+                console.log("=--->found a match", param, mission.parameters[param])
                 value=mission.parameters[param]
                 parameter_class="parameter-display"
                 param_status="filled"

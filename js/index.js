@@ -123,8 +123,6 @@ function action(task,tag){
 
 
 async function process_menu(menu,item){
-    console.log("hi")
-    
     console.log("menu",menu)
     console.log("item",item)
 
@@ -134,6 +132,7 @@ async function process_menu(menu,item){
             show_spy_operations()
             return
         }
+ 
     }
 
     // send request to the server
