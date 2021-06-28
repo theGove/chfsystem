@@ -184,6 +184,7 @@ async function fetch_spy_data(){
 
     function build_op(operation){
         const op=JSON.parse(JSON.stringify(operation))
+        console.log("operaiont", op)
         const task_set=[]
         get_task_list(op.starting_task[0], task_set)
         console.log(task_set)
