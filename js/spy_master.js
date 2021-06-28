@@ -19,7 +19,7 @@ async function get_voice_url(mission_id, text, speaker, language, campaign, tone
     if(!language){language="en-GB"}//british
 
 
-    speaker=document.getElementById("voice").value
+    //speaker=document.getElementById("voice").value
     if(!document.getElementById("rebuild_voice").value ){
 
         // check to see if we alread have this audio on dynamodb
@@ -317,7 +317,7 @@ async function show_spy_mission_activity(payload){
         missions:{}
     }}
     operations[item.operation.S].missions[item.mission.S]=item
-    spy_data[item.operation.S].missions[item.mission.S].active=item.active_spies.N
+   // spy_data[item.operation.S].missions[item.mission.S].active=item.active_spies.N
   }
   console.log("operations",operations)
   console.log("spy_data",spy_data)
@@ -353,10 +353,10 @@ async function show_spy_mission_activity(payload){
         html.push(mission.spy_limit.N)    
         html.push('</td><td><img data-increment="-1" data-operation_id="'+operation_id+'" data-mission_id="'+mission_id+'" data-column="spy_limit" style="cursor:pointer" onclick="set_mission_activity(this)" width="20" src="/images/down-arrow.png"></td><td id="mission_'+mission_id+'"></td>')    
         
-        html.push("</tr></tr>")    
-        html.push('<td>&nbsp;</td><td>Active Spies</td><td><img data-increment="1" data-operation_id="'+operation_id+'" data-mission_id="'+mission_id+'" data-column="active_spies" style="cursor:pointer" onclick="set_mission_activity(this)" width="20" src="/images/up-arrow.png"></td><td id="'+operation_id + '_' + mission_id + '_active_spies">')
-        html.push(mission.active_spies.N)    
-        html.push('</td><td><img data-increment="-1" data-operation_id="'+operation_id+'" data-mission_id="'+mission_id+'" data-column="active_spies" style="cursor:pointer" onclick="set_mission_activity(this)" width="20" src="/images/down-arrow.png"></td><td id="mission_'+mission_id+'"></td>')    
+        // html.push("</tr></tr>")    
+        // html.push('<td>&nbsp;</td><td>Active Spies</td><td><img data-increment="1" data-operation_id="'+operation_id+'" data-mission_id="'+mission_id+'" data-column="active_spies" style="cursor:pointer" onclick="set_mission_activity(this)" width="20" src="/images/up-arrow.png"></td><td id="'+operation_id + '_' + mission_id + '_active_spies">')
+        // html.push(mission.active_spies.N)    
+        // html.push('</td><td><img data-increment="-1" data-operation_id="'+operation_id+'" data-mission_id="'+mission_id+'" data-column="active_spies" style="cursor:pointer" onclick="set_mission_activity(this)" width="20" src="/images/down-arrow.png"></td><td id="mission_'+mission_id+'"></td>')    
         
         html.push("</tr></table>")    
         html.push("</div>")    
@@ -655,6 +655,7 @@ async function publish_mission(operation_id, mission_id){
     mission.spy_limit = operation.missions[mission_id].spy_limit
     mission.operation = operation.name
     mission.side = operation.side
+    mission.age = operation.age
     mission.starting_task = operation.starting_task
     mission.active = false
     if(operation.missions[mission_id].active){mission.active=true}
@@ -662,6 +663,8 @@ async function publish_mission(operation_id, mission_id){
     mission.description = parameter_inection(operation.description, param_values)
     mission.outcomes = JSON.parse(parameter_inection(JSON.stringify(operation.outcomes),param_values))
     mission.tasks = JSON.parse(parameter_inection(JSON.stringify(operation.tasks),param_values))
+
+    console.log("################mission#################", mission) 
 
     for([key,outcome] of Object.entries(mission.outcomes) ){
         console.log("key", key)
@@ -671,10 +674,14 @@ async function publish_mission(operation_id, mission_id){
     }
 
     for([key,task] of Object.entries(mission.tasks) ){
-        console.log(task)
+        console.log("TASK$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",task)
         html("message_" + mission_id,"Getting Misssion Audio for: " + task.description)
         mission.tasks[key].audio = await get_voice_url(mission_id, task.description, operation.voice)
-
+        if(param_values["expiry_"+key]){
+            mission.tasks[key].minutes_or_expiry = parseInt(param_values["expiry_"+key])
+        }else{
+           mission.tasks[key].minutes_or_expiry = operation.tasks.minutes_to_expire
+        }
     }
 
 
@@ -683,7 +690,7 @@ async function publish_mission(operation_id, mission_id){
     mission.audio=await get_voice_url(mission_id, mission.description, operation.voice)
     html("message_" + mission_id,"Done")
 
-    
+    console.log("amended mission ***********************", mission)
 
     // console.log("at pub mission",mission)
     
@@ -703,13 +710,15 @@ async function publish_mission(operation_id, mission_id){
                      starting_task:mission.starting_task,
                      name:mission.name,
                      mission_id:mission_id,
+                     age:mission.age,
                      operation_id:operation_id,
                      description:mission.description,
                      description_audio:mission.audio,
                      tasks:JSON.stringify(mission.tasks),
                      outcomes:JSON.stringify(mission.outcomes)
                   }  
-    console.log ("Payload",JSON.stringify(payload))
+    console.log ("===================================================================================================")
+    console.log ("Publish mission Payload",JSON.stringify(payload))
     
     response = await fetch(gas_url, {
         method: 'POST',
@@ -730,6 +739,33 @@ async function publish_mission(operation_id, mission_id){
 function html(id, text){
     document.getElementById(id).innerHTML=text
 }
+async function change_expiry(tag){
+    const parameter=tag.getAttribute("data-parameter")
+    const id = tag.getAttribute("data-mission_id")
+    const value=tag.value
+    const mission = get_mission(id)
+    //console.log("params===============================", mission.parameters)
+    mission.parameters[parameter] = value
+    // need to update the parameter on airtable
+    if(!isNaN(value)){
+      await update_mission_parameter(id,parameter,parseInt(value))
+    }
+}
+async function change_expiry_time(tag){
+    const parameter=tag.getAttribute("data-parameter")
+    const id = tag.getAttribute("data-mission_id")
+    const value=tag.value
+    const mission = get_mission(id)
+    //console.log("params===============================", mission.parameters)
+    console.log("change_expiry_time-->value", value)
+    const d=new Date(value)
+    var sec = Math.floor( d / 1000 )
+
+    mission.parameters[parameter] = sec
+    // need to update the parameter on airtable
+    await update_mission_parameter(id,parameter,parseInt(sec))
+     
+}
 
 function render_task(operation, mission_id, task_id, include_description){
     const mission = operation.missions[mission_id]
@@ -743,7 +779,65 @@ function render_task(operation, mission_id, task_id, include_description){
     }
     html.push('<div id="'+task_id+'" class="task-name">')
     html.push(task.name)
-    html.push('</div><div class="task">')
+    html.push('</div>')
+    let expiry = task.minutes_to_expire
+
+    if(mission.parameters['expiry_'+task.id]){
+        expiry = mission.parameters['expiry_'+task.id]
+    }
+    let d = new Date(0)
+    if(expiry>500){
+        // this is an absolute time
+        var minutes_class="hidden"
+        var time_class="visible"
+        
+        d.setUTCSeconds(expiry);
+        
+
+    }else{
+        // this is number of minutes since task started
+        var minutes_class="visible"
+        var time_class="hidden"
+        let d2=new Date()
+        d.setUTCSeconds(Math.round(d2.getTime() / 1000) + (expiry*60))
+
+    }
+    Number.prototype.AddZero= function(b,c){
+        var  l= (String(b|| 10).length - String(this).length)+1;
+        return l> 0? new Array(l).join(c|| '0')+this : this;
+     }//to add zero to less than 10,
+
+    let        localDateTime= [d.getFullYear(),
+        (d.getMonth()+1).AddZero(),
+        d.getDate().AddZero()
+        ].join('-') +'T' +
+       [d.getHours().AddZero(),
+        d.getMinutes().AddZero()].join(':');
+
+console.log("the date: ", localDateTime)
+
+    html.push('<div class="'+minutes_class+'" id="ex_min_' + mission.id + '_' + task.id + '">')
+    html.push('Minutes to Expire: <input data-parameter="expiry_'+task.id+'" data-mission_id="'+mission.id+'" onchange="change_expiry(this)" id="input_minutes_' + mission.id + '_' + task.id + '" type="text" size="4" name="meeting-time" value="' + expiry + '"/>')
+    html.push('</div>')
+
+
+
+    html.push('<div class="'+time_class+'" id="ex_time_' + mission.id + '_' + task.id + '" >')
+    html.push('Expire at time: <input type="datetime-local" data-parameter="expiry_'+task.id+'" data-mission_id="'+mission.id+'" id="input_time_' + mission.id + '_' + task.id + '" onchange="change_expiry_time(this)" value="'+ localDateTime +'"  />')
+    
+    html.push('</div>')
+
+
+    html.push('<div class="visible">')
+
+    html.push('<input onclick="document.getElementById(\'ex_min_' + mission.id + '_' + task.id + '\').className=\'visible\';document.getElementById(\'ex_time_' + mission.id + '_' + task.id + '\').className=\'hidden\'" type="radio"  name="Exp_type_' + mission.id + '_' + task.id + '" value="minutes"')
+    if(minutes_class==="visible"){html.push(' checked')}
+    html.push('> Minutes')
+    html.push('<input onclick="document.getElementById(\'ex_time_' + mission.id + '_' + task.id + '\').className=\'visible\';document.getElementById(\'ex_min_' + mission.id + '_' + task.id + '\').className=\'hidden\'" type="radio"  name="Exp_type_' + mission.id + '_' + task.id + '" value="time"')
+    if(time_class==="visible"){html.push(' checked')}
+    html.push('> Time')
+    html.push('</div>')
+    html.push('<div class="task">')
     html.push(task.description)
     html.push('</div>')
     if(task.outcome){
