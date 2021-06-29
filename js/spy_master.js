@@ -1021,10 +1021,12 @@ function replace_all(data, instructions){
 
 function remove_param_tags(params){
     const x=[]
-    for(const param of params){
-        if(!x.includes(param.substr(2,param.length-4))){  // no need for duplicates in parameters
+    if (params){
+        for(const param of params){
+            if(!x.includes(param.substr(2,param.length-4))){  // no need for duplicates in parameters
 
-            x.push(param.substr(2,param.length-4))
+                x.push(param.substr(2,param.length-4))
+            }
         }
     }
     return x
