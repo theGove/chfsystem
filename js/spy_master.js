@@ -186,7 +186,9 @@ async function fetch_spy_data(){
         const op=JSON.parse(JSON.stringify(operation))
         console.log("operaiont", op)
         const task_set=[]
-        get_task_list(op.starting_task[0], task_set)
+        if(op.starting_task){
+          get_task_list(op.starting_task[0], task_set)
+        }
         console.log(task_set)
         // now we have the whole set of tasks for an operation
     
@@ -220,7 +222,10 @@ async function fetch_spy_data(){
         }
         delete op.mission
         delete op.operation_id
-        op.starting_task=op.starting_task[0]
+        if(op.starting_task){
+            op.starting_task=op.starting_task[0]
+        }
+        
 
         // find all parameters
         op.parameters = remove_param_tags(JSON.stringify(op).match(/\|=(.*?)=\|/g))
@@ -478,8 +483,13 @@ async function show_mission(operation_id,mission_id){
   let task_count=0
   let include_description=true
   for(const task_id of task_array){
-    if(task_count++>0){include_description=false}  
-    html.push(render_task(operation, mission_id, task_id, include_description))
+    if(task_id){
+        if(task_count++>0){include_description=false} 
+        console.log("task_id",task_id) 
+        html.push(render_task(operation, mission_id, task_id, include_description))
+    }else{
+        html.push("<div>undefined task</div>")
+    }
   }
   html.push('<div>')
 
@@ -663,7 +673,9 @@ async function publish_mission(operation_id, mission_id){
     mission.name = parameter_inection(operation.mission_name, param_values)
     mission.description = parameter_inection(operation.description, param_values)
     mission.outcomes = JSON.parse(parameter_inection(JSON.stringify(operation.outcomes),param_values))
-    mission.tasks = JSON.parse(parameter_inection(JSON.stringify(operation.tasks),param_values))
+    const injected = parameter_inection(JSON.stringify(operation.tasks),param_values)
+    console.log("injected", injected)
+    mission.tasks = JSON.parse(injected)
 
     console.log("################mission#################", mission) 
 
@@ -991,17 +1003,19 @@ function sequence_tasks(operation, task_array, task_id){
     const task = operation.tasks[task_id] 
     //console.log("task",task)
     task_array.push(task_id)
-    if(task.outcome){// tasks only have outcomes if there is something else to report
-        for(const outcome_id of task.outcome){
-            const outcome = operation.outcomes[outcome_id]
-            if(outcome.next_task){
-                for(const out_task of outcome.next_task){
-                    if(!task_array.includes(out_task)){
-                    sequence_tasks(operation,  task_array, out_task)
+    if(task){
+        if(task.outcome){// tasks only have outcomes if there is something else to report
+            for(const outcome_id of task.outcome){
+                const outcome = operation.outcomes[outcome_id]
+                if(outcome.next_task){
+                    for(const out_task of outcome.next_task){
+                        if(!task_array.includes(out_task)){
+                        sequence_tasks(operation,  task_array, out_task)
+                        }
                     }
                 }
-            }
 
+            }
         }
     }
 
@@ -1011,7 +1025,12 @@ function sequence_tasks(operation, task_array, task_id){
 
 function replace_all(data, instructions){
     // returns data with keys in instruction replaced wiht values
-    let new_data=data
+    if(data){
+      var new_data=data  
+    }else{
+      var new_data=""
+    }
+
     for([key,value] of Object.entries(instructions)){
     	//console.log(key, value)
         new_data=new_data.split("|=" + key + "=|").join(value)
