@@ -1,8 +1,8 @@
 // culper.web.app
-
+//owned by gove@clonailhertiage.org: spechelo
 const speech_url="https://script.google.com/macros/s/" +
 //"AKfycbxJ__m5sCUF3pRj8npa0_KMcvpa0rxWQFvebhbwsS31sxpFxXuJvVGjQ-OwYjyCncNi" +
-"AKfycbyvRJjQ37NlW-FREYV8jkbYt9d7A0hBGWdb4EEZeS1DMKXpiOSHmZjQzj5oaoyXydbm"+
+"AKfycbycRGED_7vJShx4HOvvgLP26X5YbJFgVSh7Ybs7Afv6VhIX8RFsafWo-12ltrCLLTcC"+
 "/exec"
 
 async function get_voice_url(mission_id, text, speaker, language, campaign, tone){
