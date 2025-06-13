@@ -2,7 +2,7 @@
 //owned by gove@clonailhertiage.org: spechelo
 const speech_url="https://script.google.com/macros/s/" +
 //"AKfycbxJ__m5sCUF3pRj8npa0_KMcvpa0rxWQFvebhbwsS31sxpFxXuJvVGjQ-OwYjyCncNi" +
-"AKfycbycRGED_7vJShx4HOvvgLP26X5YbJFgVSh7Ybs7Afv6VhIX8RFsafWo-12ltrCLLTcC"+
+"AKfycbxtXRUlcpwM44raa6cGhy219kHLDz1SwOMKPRLHWyv_Ur2f1eMdSgin-aVnQMOrBDej"+
 "/exec"
 
 async function get_voice_url(mission_id, text, speaker, language, campaign, tone){
