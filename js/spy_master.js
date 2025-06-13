@@ -39,7 +39,7 @@ async function get_voice_url(mission_id, text, speaker, language, campaign, tone
     const payload={voucher:voucher,token:token,text:text, speaker:speaker, tone:tone, campaign:campaign, language:language}
     let body=JSON.stringify(payload)
     //body='{"text","Hessian soldiers just might switch sides if they knew how much better life in America is!","speaker":"Emma","tone":"normal","campaign":237356,"language":"en-GB"}'
-    //console.log ("payload",body)
+    console.log ("payload",body)
 
     const request={
         method: 'POST',
