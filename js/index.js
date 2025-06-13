@@ -26,15 +26,17 @@ function onSignIn(googleUser) {
     console.log ("payload",JSON.stringify(payload))
     //document.getElementById("nav").innerHTML = '<div class="message">Welcome ' + user.givenName + '. Getting Activities...'
     document.getElementById("status").innerHTML='<img width="40px" src="images/wait.gif" />'
-
-    fetch(gas_url, {
+    const options={
         method: 'POST',
         body: JSON.stringify(payload),
         credentials: 'omit', // include, *same-origin, omit
         headers: {
             'Content-Type': 'text/plain;charset=utf-8',
         }
-    }).then(response => response.text())
+    }
+    console.log("URL", gas_url)
+    console.log(options)
+    fetch(gas_url, options).then(response => response.text())
     .then(payload => {
     
         console.log(payload)
