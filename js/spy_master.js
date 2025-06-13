@@ -36,11 +36,12 @@ async function get_voice_url(mission_id, text, speaker, language, campaign, tone
      console.log("after audio exit")
     // audio does not already exist, make it
 
-    const payload={voucher:voucher,token:token,text:text, speaker:speaker, tone:tone, campaign:campaign, language:language}
+    const payload={text:text, speaker:speaker, tone:tone, campaign:campaign, language:language}
     let body=JSON.stringify(payload)
     //body='{"text","Hessian soldiers just might switch sides if they knew how much better life in America is!","speaker":"Emma","tone":"normal","campaign":237356,"language":"en-GB"}'
     console.log ("payload",body)
-
+    console.log("speech_url",speech_url)
+    
     const request={
         method: 'POST',
         body: body,
